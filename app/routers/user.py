@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.dao import dao_users
 from app.schemas.user import User
+from app.utils import hash_password
 
 
 router = APIRouter(prefix='/user')
@@ -36,7 +37,9 @@ def create_user(user: User):
 
     if user_exists:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"msg": "The user already exists!"})
-
+    
+    password_hash = hash_password(user.password)
+    user.password = password_hash
     user_created = dao_users.insert(user)
 
     if not user_created:
@@ -53,6 +56,8 @@ def update_user(email: str, user: User):
     if not user_exists:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"msg": "The user does not exist! "})
     
+    password_hash = hash_password(user.password)
+    user.password = password_hash
     user_updated = dao_users.update_by_email(email, user)
 
     if not user_updated:
