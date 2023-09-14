@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.dao import dao_users
 from app.schemas.user import User
-from app.utils import hash_password
+from app.auth import hash_password
 
 
 router = APIRouter(prefix='/user')

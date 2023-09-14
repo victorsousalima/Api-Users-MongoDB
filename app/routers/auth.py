@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.dao import dao_users
 from app.dao.dao_auth import saving_token_logout
-from app.utils import verify_hash_password, create_token, verify_token, return_token
+from app.auth import verify_hash_password, create_token, verify_token, return_token
 
 router = APIRouter(
     prefix="/auth",

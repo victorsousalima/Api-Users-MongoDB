@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
-from app.parameters import SECRET_KEY, ALGORITHM
+from app.parameters import SECRET_KEY, ALGORITHM, EXPIRE
 from app.dao.dao_users import select_by_email
 from app.dao.dao_auth import verify_token_revoked
 
@@ -18,7 +18,7 @@ def create_token(email: str, name: str):
     payload = {
         "sub" : email,
         "name" : name,
-        "exp" : datetime.utcnow() + timedelta(days=10),
+        "exp" : datetime.utcnow() + timedelta(days=EXPIRE),
         "type" : "login"
     }
 
