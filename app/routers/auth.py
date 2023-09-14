@@ -3,7 +3,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 
 from app.dao import dao_users
-from app.utils import verify_hash_password, create_token, verify_token
+from app.dao.dao_auth import saving_token_logout
+from app.utils import verify_hash_password, create_token, verify_token, return_token
 
 router = APIRouter(
     prefix="/auth",
@@ -35,8 +36,23 @@ def login(user: OAuth2PasswordRequestForm = Depends()):
         )
 
 
-#@router.post("/")
-#def token_check(token: str = Depends(verify_token())):
+@router.post("/logout")
+def logout(token: str = Depends(return_token)):
+
+    token_revoked = saving_token_logout(token)
+
+    if not token_revoked:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"msg": "error revoking token"}
+        )
+    
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"msg": "The token is revoked!"})
+
+
+
+@router.get("/")
+def token_check(token: str = Depends(verify_token)):
 
     if token["type"] == 'login':
         return JSONResponse(
