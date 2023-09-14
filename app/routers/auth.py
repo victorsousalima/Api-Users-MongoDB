@@ -32,7 +32,7 @@ def login(user: OAuth2PasswordRequestForm = Depends()):
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"msg": "Invalid password"}
+            detail={"msg": "login or password error"}
         )
 
 
