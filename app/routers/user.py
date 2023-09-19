@@ -1,9 +1,9 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
 from app.dao import dao_users
 from app.schemas.user import User
-from app.auth import hash_password
+from app.auth import hash_password, verify_token
 
 
 router = APIRouter(prefix='/user')
@@ -19,10 +19,10 @@ def get_all_users():
     return JSONResponse(status_code=status.HTTP_200_OK, content=users)
 
 
-@router.get('/{email}')
-def get_by_email(email: str):
+@router.get('/email')
+def get_by_email(payload: dict = Depends(verify_token)):
 
-    user = dao_users.select_by_email(email)
+    user = dao_users.select_by_email(payload["sub"])
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"msg": "The user was not found!"})
@@ -49,16 +49,16 @@ def create_user(user: User):
 
 
 @router.put('/update')
-def update_user(email: str, user: User):
+def update_user(user: User, payload: dict = Depends(verify_token)):
 
-    user_exists = dao_users.select_by_email(email)
+    user_exists = dao_users.select_by_email(payload["sub"])
 
     if not user_exists:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"msg": "The user does not exist! "})
     
     password_hash = hash_password(user.password)
     user.password = password_hash
-    user_updated = dao_users.update_by_email(email, user)
+    user_updated = dao_users.update_by_email(payload["sub"], user)
 
     if not user_updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"msg": "The user has not been updated!"})
@@ -67,14 +67,14 @@ def update_user(email: str, user: User):
 
 
 @router.delete('/delete')
-def delete_user(email: str):
+def delete_user(payload: dict = Depends(verify_token)):
     
-    user_exists = dao_users.select_by_email(email)
+    user_exists = dao_users.select_by_email(payload["sub"])
 
     if not user_exists:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"msg": "The user does not exist! "})
     
-    user_deleted = dao_users.delete_by_email(email)
+    user_deleted = dao_users.delete_by_email(payload["sub"])
 
     if not user_deleted:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"msg": "The user has not been deleted!"})
