@@ -51,7 +51,7 @@ def logout(token: str = Depends(return_token)):
 
 
 
-@router.get("/")
+@router.post("/")
 def token_check(token: str = Depends(verify_token)):
 
     if token["type"] == 'login':
